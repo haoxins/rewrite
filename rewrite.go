@@ -33,7 +33,7 @@ func (r *Rule) Rewrite(req *http.Request) bool {
 		return false
 	}
 
-	to := path.Clean(replace(req.URL, r.To))
+	to := path.Clean(r.Replace(req.URL))
 
 	u, e := url.Parse(to)
 	if e != nil {
@@ -48,6 +48,19 @@ func (r *Rule) Rewrite(req *http.Request) bool {
 	}
 
 	return true
+}
+
+func (r *Rule) Replace(u *url.URL) string {
+	if !isReg(r.To) {
+		return r.To
+	}
+
+	regFrom := regexp.MustCompile(r.Pattern)
+	match := regFrom.FindStringSubmatchIndex(u.RequestURI())
+
+	result := regFrom.ExpandString([]byte(""), r.To, u.RequestURI(), match)
+
+	return string(result[:])
 }
 
 func NewHandler(rules map[string]string) RewriteHandler {
@@ -78,6 +91,11 @@ func (h *RewriteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func replace(u *url.URL, to string) string {
-	return to
+func isReg(s string) bool {
+	r, e := regexp.MatchString("\\$", s)
+	if e != nil {
+		return false
+	}
+
+	return r
 }

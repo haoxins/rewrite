@@ -16,6 +16,8 @@ import "github.com/pkg4go/rewrite"
 
 handler := rewrite.NewHandler(map[string]string{
   "/a": "/b",
+  "/api/(.*)", "/api/v1/$1",
+  "/api/(.*)/actions/(.*)", "/api/v1/$1/actions/$2",
 })
 
 // ...

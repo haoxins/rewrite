@@ -34,6 +34,33 @@ func TestRewrite(t *testing.T) {
 				testFixture{from: "/a/b/c", to: "/bb"},
 			},
 		},
+		testCase{
+			pattern: "/r/(.*)",
+			to:      `/r/v1/$1`,
+			fixtures: []testFixture{
+				testFixture{from: "/a", to: "/a"},
+				testFixture{from: "/r", to: "/r"},
+				testFixture{from: "/r/a", to: "/r/v1/a"},
+				testFixture{from: "/r/a/b", to: "/r/v1/a/b"},
+			},
+		},
+		testCase{
+			pattern: "/r/(.*)/a/(.*)",
+			to:      `/r/v1/$1/a/$2`,
+			fixtures: []testFixture{
+				testFixture{from: "/r/1/2", to: "/r/1/2"},
+				testFixture{from: "/r/1/a/2", to: "/r/v1/1/a/2"},
+				testFixture{from: "/r/1/a/2/3", to: "/r/v1/1/a/2/3"},
+			},
+		},
+		testCase{
+			pattern: "/r/(.*)/a/(.*)",
+			to:      `/r/v1/$2/a/$1`,
+			fixtures: []testFixture{
+				testFixture{from: "/r/1/a/2", to: "/r/v1/2/a/1"},
+				testFixture{from: "/r/1/a/2/3", to: "/r/v1/2/3/a/1"},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -63,7 +90,7 @@ func TestRewrite(t *testing.T) {
 					test.pattern, test.to, fixture.from, fixture.to)
 			}
 
-			t.Log(res.Header().Get(headerField))
+			t.Logf("Flag: %s", res.Header().Get(headerField))
 		}
 	}
 }
