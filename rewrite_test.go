@@ -61,6 +61,22 @@ func TestRewrite(t *testing.T) {
 				testFixture{from: "/r/1/a/2/3", to: "/r/v1/2/3/a/1"},
 			},
 		},
+		testCase{
+			pattern: "/from/:one/to/:two",
+			to:      "/from/:two/to/:one",
+			fixtures: []testFixture{
+				testFixture{from: "/from/123/to/456", to: "/from/456/to/123"},
+				testFixture{from: "/from/abc/to/def", to: "/from/def/to/abc"},
+			},
+		},
+		testCase{
+			pattern: "/from/:one/to/:two",
+			to:      "/:one/:two/:three/:two/:one",
+			fixtures: []testFixture{
+				testFixture{from: "/from/123/to/456", to: "/123/456/:three/456/123"},
+				testFixture{from: "/from/abc/to/def", to: "/abc/def/:three/def/abc"},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -86,8 +102,8 @@ func TestRewrite(t *testing.T) {
 
 			t.Logf("Rewrited: %s", req.URL.Path)
 			if req.URL.Path != fixture.to {
-				t.Errorf("Test failed - pattern: %s, to: %s. Fixture from %s to %s",
-					test.pattern, test.to, fixture.from, fixture.to)
+				t.Errorf("Test failed \n pattern: %s, to: %s, \n fixture: %s to %s, \n result: %s",
+					test.pattern, test.to, fixture.from, fixture.to, req.URL.Path)
 			}
 
 			t.Logf("Flag: %s", res.Header().Get(headerField))

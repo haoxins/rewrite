@@ -18,6 +18,7 @@ handler := rewrite.NewHandler(map[string]string{
   "/a": "/b",
   "/api/(.*)", "/api/v1/$1",
   "/api/(.*)/actions/(.*)", "/api/v1/$1/actions/$2",
+  "/from/:one/to/:two", "/from/:two/to/:one",
 })
 
 // ...

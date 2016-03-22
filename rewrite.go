@@ -2,8 +2,10 @@ package rewrite
 
 import "net/http"
 import "net/url"
+import "strings"
 import "regexp"
 import "path"
+import "fmt"
 
 const headerField = "X-Rewrite-Original-URI"
 
@@ -13,7 +15,13 @@ type Rule struct {
 	*regexp.Regexp
 }
 
+var regfmt = regexp.MustCompile(`:[^/#?()\.\\]+`)
+
 func NewRule(pattern, to string) (*Rule, error) {
+	pattern = regfmt.ReplaceAllStringFunc(pattern, func(m string) string {
+		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
+	})
+
 	reg, err := regexp.Compile(pattern)
 	if err != nil {
 		return nil, err
@@ -51,16 +59,40 @@ func (r *Rule) Rewrite(req *http.Request) bool {
 }
 
 func (r *Rule) Replace(u *url.URL) string {
-	if !isReg(r.To) {
+	if !hit("\\$|\\:", r.To) {
 		return r.To
 	}
 
+	uri := u.RequestURI()
+
 	regFrom := regexp.MustCompile(r.Pattern)
-	match := regFrom.FindStringSubmatchIndex(u.RequestURI())
+	match := regFrom.FindStringSubmatchIndex(uri)
 
-	result := regFrom.ExpandString([]byte(""), r.To, u.RequestURI(), match)
+	result := regFrom.ExpandString([]byte(""), r.To, uri, match)
 
-	return string(result[:])
+	str := string(result[:])
+
+	if hit("\\:", str) {
+		return r.replaceNamedParams(uri, str)
+	}
+
+	return str
+}
+
+var urlreg = regexp.MustCompile(`:[^/#?()\.\\]+|\(\?P<[a-zA-Z0-9]+>.*\)`)
+
+func (r *Rule) replaceNamedParams(from, to string) string {
+	fromMatches := r.FindStringSubmatch(from)
+
+	if len(fromMatches) > 0 {
+		for i, name := range r.SubexpNames() {
+			if len(name) > 0 {
+				to = strings.Replace(to, ":"+name, fromMatches[i], -1)
+			}
+		}
+	}
+
+	return to
 }
 
 func NewHandler(rules map[string]string) RewriteHandler {
@@ -91,8 +123,8 @@ func (h *RewriteHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func isReg(s string) bool {
-	r, e := regexp.MatchString("\\$", s)
+func hit(pattern, str string) bool {
+	r, e := regexp.MatchString(pattern, str)
 	if e != nil {
 		return false
 	}
