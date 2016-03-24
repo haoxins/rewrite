@@ -106,7 +106,12 @@ func TestRewrite(t *testing.T) {
 					test.pattern, test.to, fixture.from, fixture.to, req.URL.Path)
 			}
 
-			t.Logf("Flag: %s", res.Header().Get(headerField))
+			if req.Header.Get(headerField) != "" {
+				// matched
+				if req.Header.Get(headerField) != fixture.from {
+					t.Error("incorrect flag")
+				}
+			}
 		}
 	}
 }
