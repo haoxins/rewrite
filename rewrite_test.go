@@ -54,6 +54,22 @@ func TestRewrite(t *testing.T) {
 			},
 		},
 		testCase{
+			pattern: "/a/(.*)/b/(.*)",
+			to:      `/q?a=$1&b=$2`,
+			fixtures: []testFixture{
+				testFixture{from: "/a/1/2", to: "/a/1/2"},
+				testFixture{from: "/a/1/b/2", to: "/q?a=1&b=2"},
+			},
+		},
+		testCase{
+			pattern: "/q?a=$1&b=$2",
+			to:      `/a/(.*)/b/(.*)`,
+			fixtures: []testFixture{
+				testFixture{from: "/a/1/2", to: "/a/1/2"},
+				testFixture{from: "/q?a=1&b=2", to: "/a/1/b/2"},
+			},
+		},
+		testCase{
 			pattern: "/r/(.*)/a/(.*)",
 			to:      `/r/v1/$2/a/$1`,
 			fixtures: []testFixture{
@@ -75,6 +91,22 @@ func TestRewrite(t *testing.T) {
 			fixtures: []testFixture{
 				testFixture{from: "/from/123/to/456", to: "/123/456/:three/456/123"},
 				testFixture{from: "/from/abc/to/def", to: "/abc/def/:three/def/abc"},
+			},
+		},
+		testCase{
+			pattern: "/from/:one/to/:two",
+			to:      "/q?from=:one&to=:two",
+			fixtures: []testFixture{
+				testFixture{from: "/from/123/to/456", to: "/q?from=123&to=456"},
+				testFixture{from: "/from/abc/to/def", to: "/q?from=abc&to=def"},
+			},
+		},
+		testCase{
+			pattern: "/q?from=:one&to=:two",
+			to:      "/from/:one/to/:two",
+			fixtures: []testFixture{
+				testFixture{from: "/q?from=123&to=456", to: "/from/123/to/456"},
+				testFixture{from: "/q?from=abc&to=def", to: "/from/abc/to/def"},
 			},
 		},
 	}
