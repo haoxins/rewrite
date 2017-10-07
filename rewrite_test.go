@@ -77,6 +77,13 @@ func TestRewrite(t *testing.T) {
 				testFixture{from: "/from/abc/to/def", to: "/abc/def/:three/def/abc"},
 			},
 		},
+		testCase{
+			pattern: "/from/(.*)",
+			to:      "/to/$1",
+			fixtures: []testFixture{
+				testFixture{from: "/from/untitled-1%2F/upload", to: "/to/untitled-1%2F/upload"},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -92,18 +99,18 @@ func TestRewrite(t *testing.T) {
 				test.pattern: test.to,
 			})
 
-			t.Logf("From: %s", req.URL.Path)
-			if req.URL.Path != fixture.from {
+			t.Logf("From: %s", req.URL.EscapedPath())
+			if req.URL.EscapedPath() != fixture.from {
 				t.Errorf("Invalid test fixture: %s", fixture.from)
 			}
 
 			res := httptest.NewRecorder()
 			h.ServeHTTP(res, req)
 
-			t.Logf("Rewrited: %s", req.URL.Path)
-			if req.URL.Path != fixture.to {
+			t.Logf("Rewrited: %s", req.URL.EscapedPath())
+			if req.URL.EscapedPath() != fixture.to {
 				t.Errorf("Test failed \n pattern: %s, to: %s, \n fixture: %s to %s, \n result: %s",
-					test.pattern, test.to, fixture.from, fixture.to, req.URL.Path)
+					test.pattern, test.to, fixture.from, fixture.to, req.URL.EscapedPath())
 			}
 
 			if req.Header.Get(headerField) != "" {
