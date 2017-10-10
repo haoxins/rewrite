@@ -51,6 +51,7 @@ func (r *Rule) Rewrite(req *http.Request) bool {
 	req.Header.Set(headerField, req.URL.RequestURI())
 
 	req.URL.Path = u.Path
+	req.URL.RawPath = u.RawPath
 	if u.RawQuery != "" {
 		req.URL.RawQuery = u.RawQuery
 	}
