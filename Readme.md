@@ -1,15 +1,14 @@
+[![Build Status Badge]][Build Status]
+[![Go Docs Badge]][Go Docs]
 
-[![Build status][travis-img]][travis-url]
-[![PkgGoDev](https://pkg.go.dev/badge/pkg4go/rewrite)](https://pkg.go.dev/github.com/pkg4go/rewrite)
+### Rewrite
 
-### rewrite
-
-golang URL rewriting
+Golang URL rewriting
 
 ### Usage
 
 ```go
-import "github.com/pkg4go/rewrite"
+import "github.com/haoxins/rewrite"
 
 // ...
 
@@ -23,8 +22,7 @@ handler := rewrite.NewHandler(map[string]string{
 // ...
 ```
 
-### License
-MIT
-
-[travis-img]: https://img.shields.io/travis/pkg4go/rewrite.svg?style=flat-square
-[travis-url]: https://travis-ci.org/pkg4go/rewrite
+[Build Status Badge]: https://github.com/haoxins/rewrite/actions/workflows/test.yaml/badge.svg
+[Build Status]: https://github.com/haoxins/rewrite/actions/workflows/test.yaml
+[Go Docs Badge]: https://pkg.go.dev/badge/github.com/haoxins/rewrite
+[Go Docs]: https://pkg.go.dev/github.com/haoxins/rewrite
